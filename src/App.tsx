@@ -88,6 +88,7 @@ export default function App() {
   const [pembayaran, setPembayaran] = useState<Pembayaran[]>(() => dbManager.getTable('pembayaran'));
   const [pengguna, setPengguna] = useState<Pengguna[]>(() => dbManager.getTable('pengguna'));
   const [settings, setSettings] = useState<Pengaturan>(() => dbManager.getTable('pengaturan'));
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(new Date());
 
   // Form states for login screen
   const [loginUsername, setLoginUsername] = useState('');
@@ -246,6 +247,38 @@ export default function App() {
   // DATA OPERATIONS (CRUD / TRIGGERS)
   // ----------------------------------------------------
   
+  // Auto-sync mechanism: refresh data from GAS periodically
+  React.useEffect(() => {
+    if (settings.gas_url && settings.gas_url.trim() !== '') {
+      const syncInterval = setInterval(async () => {
+        try {
+          const tables = ['dusun', 'rt', 'periode', 'subjek', 'objek', 'sppt', 'pembayaran', 'pengguna'] as const;
+          
+          await Promise.all(tables.map(async (table) => {
+            await dbManager.executeAction('getData', { table });
+          }));
+
+          // Refresh states
+          setDusun(dbManager.getTable('dusun'));
+          setRt(dbManager.getTable('rt'));
+          setPeriode(dbManager.getTable('periode'));
+          setSubjek(dbManager.getTable('subjek'));
+          setObjek(dbManager.getTable('objek'));
+          setSppt(dbManager.getTable('sppt'));
+          setPembayaran(dbManager.getTable('pembayaran'));
+          setPengguna(dbManager.getTable('pengguna'));
+          
+          setLastSyncTime(new Date());
+          console.log("Automatic synchronization completed.");
+        } catch (e) {
+          console.warn("Automatic synchronization failed, will retry later.", e);
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+
+      return () => clearInterval(syncInterval);
+    }
+  }, [settings.gas_url]);
+
   // 1. Dusun CRUD
   const handleAddDusun = (newDusun: Dusun) => {
     dbManager.writeRow('dusun', newDusun, 'id');
@@ -503,6 +536,7 @@ export default function App() {
             sppt={sppt}
             pembayaran={pembayaran}
             settings={settings}
+            lastSyncTime={lastSyncTime}
             onChangeMenu={setCurrentMenu}
           />
         );

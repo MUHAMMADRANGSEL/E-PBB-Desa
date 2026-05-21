@@ -15,7 +15,8 @@ import {
   Contact2,
   AlertTriangle,
   TrendingDown,
-  BarChart as BarChartIcon
+  BarChart as BarChartIcon,
+  RefreshCcw
 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Dusun, RT, Periode, Subjek, ObjekPajak, SPPT, Pembayaran, Pengguna, Pengaturan } from '../types';
@@ -30,6 +31,7 @@ interface DashboardViewProps {
   sppt: SPPT[];
   pembayaran: Pembayaran[];
   settings: Pengaturan;
+  lastSyncTime: Date | null;
   onChangeMenu: (menu: string) => void;
   onSetQuickCheckNOP?: (nop: string) => void;
 }
@@ -43,6 +45,7 @@ export default function DashboardView({
   sppt,
   pembayaran,
   settings,
+  lastSyncTime,
   onChangeMenu,
   onSetQuickCheckNOP
 }: DashboardViewProps) {
@@ -129,6 +132,15 @@ export default function DashboardView({
 
   return (
     <div className="space-y-6 fade-in text-slate-700">
+      
+      {/* Sync Status Banner */}
+      {lastSyncTime && (
+        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs px-4 py-2 rounded-xl font-medium">
+          <RefreshCcw className="w-4 h-4" />
+          <span>Terakhir disinkronisasi: {lastSyncTime.toLocaleTimeString('id-ID')}</span>
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-lg overflow-hidden relative">
         <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform -translate-y-6 translate-x-12 select-none">

@@ -34,12 +34,26 @@ export default function HakAksesView({ pengguna, onEdit }: HakAksesViewProps) {
     }
   }, [pengguna, selectedUserId]);
 
-  const selectedUser = pengguna.find(p => p.ID_User === selectedUserId);
+  const rawSelectedUser = pengguna.find(p => p.ID_User === selectedUserId);
+  
+  // Automatically clean permissions based on current MENU_LIST
+  const selectedUser = React.useMemo(() => {
+    if (!rawSelectedUser) return null;
+    const validMenuIds = MENU_LIST.map(m => m.id);
+    return {
+        ...rawSelectedUser,
+        permissions: (rawSelectedUser.permissions || []).filter(p => validMenuIds.includes(p.menuId))
+    };
+  }, [rawSelectedUser]);
 
   const updatePermission = (menuId: string, field: keyof MenuPermission, value: boolean) => {
     if (!selectedUser) return;
 
-    const existingPerms = selectedUser.permissions || [];
+    // Filter out any permissions that are no longer in the system menu
+    const validMenuIds = MENU_LIST.map(m => m.id);
+    const cleanedPerms = (selectedUser.permissions || []).filter(p => validMenuIds.includes(p.menuId));
+
+    const existingPerms = cleanedPerms;
     const permIndex = existingPerms.findIndex(p => p.menuId === menuId);
 
     let newPerms = [...existingPerms];
