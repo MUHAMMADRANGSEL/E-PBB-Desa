@@ -28,6 +28,12 @@ const MENU_LIST = [
 export default function HakAksesView({ pengguna, onEdit }: HakAksesViewProps) {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(pengguna[0]?.ID_User || null);
 
+  React.useEffect(() => {
+    if (!selectedUserId && pengguna.length > 0) {
+      setSelectedUserId(pengguna[0].ID_User);
+    }
+  }, [pengguna, selectedUserId]);
+
   const selectedUser = pengguna.find(p => p.ID_User === selectedUserId);
 
   const updatePermission = (menuId: string, field: keyof MenuPermission, value: boolean) => {
