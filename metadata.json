@@ -1,0 +1,6 @@
+{
+  "name": "E-PBB Desa",
+  "description": "Sistem Informasi Pengelolaan Pajak Bumi dan Bangunan (PBB) tingkat Desa dengan pendataan wajib pajak, objek pajak, SPPT, dan pembayaran.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
