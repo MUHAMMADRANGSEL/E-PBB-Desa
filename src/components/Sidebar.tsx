@@ -66,6 +66,7 @@ export default function Sidebar({
     { id: 'local_setup', label: 'Setup Database Lokal', icon: Wrench, section: 'Laporan & Pengaturan', adminOnly: true },
     { id: 'cloud_sheets', label: 'Integrasi Cloud Sheets', icon: Cloud, section: 'Laporan & Pengaturan', adminOnly: true },
     { id: 'pengguna', label: 'Pengguna & Akses', icon: Users2, section: 'Laporan & Pengaturan', adminOnly: true },
+    { id: 'hak_akses', label: 'Hak Akses User', icon: ShieldCheck, section: 'Laporan & Pengaturan', adminOnly: true },
     { id: 'pengaturan', label: 'Pengaturan Aplikasi', icon: Settings, section: 'Laporan & Pengaturan', adminOnly: true }
   ];
 
@@ -127,7 +128,19 @@ export default function Sidebar({
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
           {sections.map((sectionName) => {
             const items = menuItems.filter(
-              (item) => item.section === sectionName && (!item.adminOnly || isAdmin)
+              (item) => {
+                // Section filter
+                if (item.section !== sectionName) return false;
+                
+                // Existing admin constraint
+                if (item.adminOnly && !isAdmin) return false;
+                
+                // Permission filter: If a specific canView rule exists for this menu, follow it
+                const perm = currentUser.permissions?.find(p => p.menuId === item.id);
+                if (perm && !perm.canView) return false;
+                
+                return true;
+              }
             );
 
             if (items.length === 0) return null;

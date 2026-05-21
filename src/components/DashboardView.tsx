@@ -12,7 +12,8 @@ import {
   Plus, 
   Database,
   Calendar,
-  Contact2
+  Contact2,
+  AlertTriangle
 } from 'lucide-react';
 import { Dusun, RT, Periode, Subjek, ObjekPajak, SPPT, Pembayaran, Pengguna, Pengaturan } from '../types';
 import MonthlyPaymentChart from './MonthlyPaymentChart';
@@ -50,6 +51,12 @@ export default function DashboardView({
   const filteredSPPT = selectedTahun 
     ? sppt.filter(s => s.tahun === selectedTahun) 
     : sppt;
+
+  // Due SPPTs (Belum Lunas in active tax year)
+  const dueSPPTs = filteredSPPT
+    .filter(s => s.status === 'Belum Lunas')
+    .sort((a, b) => b.pagu - a.pagu)
+    .slice(0, 5);
 
   // Key figures
   const totalSPPT = filteredSPPT.length;
@@ -100,6 +107,24 @@ export default function DashboardView({
           </p>
         </div>
       </div>
+
+      {/* Due Tax Cards if any */}
+      {dueSPPTs.length > 0 && (
+        <div className="bg-amber-50 rounded-2xl p-6 border border-amber-100 shadow-sm space-y-4">
+          <h4 className="text-sm font-bold text-amber-900 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            NOP Jatuh Tempo / Belum Lunas ({selectedTahun})
+          </h4>
+          <div className="space-y-2">
+            {dueSPPTs.map(s => (
+              <div key={s.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-amber-100 shadow-xs">
+                <span className="text-xs font-bold text-slate-700">{s.nama_pemilik_sppt || 'Wajib Pajak'}</span>
+                <span className="text-xs font-black text-amber-700">{formatRp(s.pagu)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Real-time Year Selection Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">

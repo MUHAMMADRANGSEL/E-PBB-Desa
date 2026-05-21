@@ -129,7 +129,9 @@ export class DatabaseManager {
 
   // Tables access
   public getTable<T extends keyof LocalDatabase>(table: T): LocalDatabase[T] {
-    return this.db[table];
+    // Return a shallow copy to ensure array references change on updates
+    const tableData = this.db[table];
+    return Array.isArray(tableData) ? [...tableData] as any : tableData;
   }
 
   // Update table row or insert

@@ -83,12 +83,20 @@ export interface Pembayaran {
   nama_wp?: string;
 }
 
+export interface MenuPermission {
+  menuId: string;
+  canView: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
 export interface Pengguna {
   ID_User: string;
   Nama: string;
   Username: string;
   Password?: string; // Stored simply in simulation
   Role: 'Admin' | 'Kolektor';
+  permissions?: MenuPermission[];
 }
 
 export interface Pengaturan {

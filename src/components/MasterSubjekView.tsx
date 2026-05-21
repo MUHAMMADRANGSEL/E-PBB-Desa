@@ -66,8 +66,9 @@ export default function MasterSubjekView({
       return;
     }
 
-    if (trimmedNik.length !== 16) {
-      setError('Format NIK harus genap 16 karakter angka.');
+    const nikRegex = /^\d{16}$/;
+    if (!nikRegex.test(trimmedNik)) {
+      setError('Format NIK tidak valid. NIK harus terdiri dari tepat 16 digit angka.');
       return;
     }
 

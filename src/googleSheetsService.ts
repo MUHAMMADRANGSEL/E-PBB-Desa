@@ -221,6 +221,44 @@ export async function readSheetValues(
   return data.values || [];
 }
 
+// Add a worksheet if it doesn't exist
+export async function ensureSheetExists(accessToken: string, spreadsheetId: string, sheetName: string) {
+  try {
+    // Try to get sheet values to check if it exists
+    await readSheetValues(accessToken, spreadsheetId, `${sheetName}!A1:A1`);
+  } catch (e) {
+    // If it fails, assume it doesn't exist and attempt to add it
+    const resp = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requests: [{
+            addSheet: {
+              properties: {
+                title: sheetName,
+              }
+            }
+          }]
+        })
+      }
+    );
+    if (!resp.ok) {
+      throw new Error(`Gagal membuat sheet ${sheetName}: ${await resp.text()}`);
+    }
+    
+    // After adding the sheet, add the headers!
+    const headers = SHEET_HEADERS[sheetName];
+    if (headers) {
+      await writeSheetValues(accessToken, spreadsheetId, `${sheetName}!A1`, [headers]);
+    }
+  }
+}
+
 // Push local database entirely to a spreadsheet
 export async function pushDatabaseToSpreadsheet(
   accessToken: string,
@@ -232,6 +270,9 @@ export async function pushDatabaseToSpreadsheet(
     if (sheetName === 'pengaturan' && list && !Array.isArray(list)) {
       list = [list];
     }
+    // Ensure the sheet exists first
+    await ensureSheetExists(accessToken, spreadsheetId, sheetName);
+
     const headers = SHEET_HEADERS[sheetName];
     
     // First clear existing data from row 2 downwards

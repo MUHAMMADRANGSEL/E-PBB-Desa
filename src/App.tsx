@@ -24,6 +24,7 @@ import MasterObjekView from './components/MasterObjekView';
 import SPPTView from './components/SPPTView';
 import PembayaranView from './components/PembayaranView';
 import LaporanView from './components/LaporanView';
+import HakAksesView from './components/HakAksesView';
 import PengaturanView from './components/PengaturanView';
 import PenggunaView from './components/PenggunaView';
 import PublicView from './components/PublicView';
@@ -474,10 +475,22 @@ export default function App() {
     setSettings(dbManager.getTable('pengaturan'));
   };
 
+  // Helper for permission checks
+  const checkPermission = (menuId: string, permissionType: 'canView' | 'canEdit' | 'canDelete'): boolean => {
+    if (!currentUser || !currentUser.permissions) return true;
+    const perm = currentUser.permissions.find(p => p.menuId === menuId);
+    if (!perm) return true;
+    return perm[permissionType];
+  };
+
   // ----------------------------------------------------
   // MENU VIEWS DISPATCHER
   // ----------------------------------------------------
   const renderCurrentAdminMenu = () => {
+    if (!checkPermission(currentMenu, 'canView')) {
+      return <div className="p-8 text-center text-slate-500 font-bold">Anda tidak memiliki izin untuk melihat halaman ini.</div>;
+    }
+
     switch (currentMenu) {
       case 'dashboard':
         return (
@@ -638,6 +651,13 @@ export default function App() {
             onAdd={handleAddPengguna}
             onEdit={handleEditPengguna}
             onDelete={handleDeletePengguna}
+          />
+        );
+      case 'hak_akses':
+        return (
+          <HakAksesView 
+            pengguna={pengguna}
+            onEdit={handleEditPengguna}
           />
         );
       case 'pengaturan':
