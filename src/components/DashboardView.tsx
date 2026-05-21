@@ -13,8 +13,11 @@ import {
   Database,
   Calendar,
   Contact2,
-  AlertTriangle
+  AlertTriangle,
+  TrendingDown,
+  BarChart as BarChartIcon
 } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Dusun, RT, Periode, Subjek, ObjekPajak, SPPT, Pembayaran, Pengguna, Pengaturan } from '../types';
 import MonthlyPaymentChart from './MonthlyPaymentChart';
 
@@ -87,6 +90,42 @@ export default function DashboardView({
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (realisasiPersen / 100) * circumference;
+
+  // Piutang Trend Data
+  const piutangTrendData = React.useMemo(() => {
+    // Total Pagu for current year
+    const totalPaguYear = filteredSPPT.reduce((sum, s) => sum + s.pagu, 0);
+
+    // Payments in this year
+    const paymentsThisYear = pembayaran.filter(p => {
+        if (!p.tgl) return false;
+        const year = p.tgl.split(' ')[0].split('-')[0];
+        return year === selectedTahun;
+    });
+
+    const monthlySummaries = Array.from({ length: 12 }, (_, i) => ({
+      month: i,
+      monthName: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'][i],
+      paid: 0
+    }));
+
+    paymentsThisYear.forEach(p => {
+      const monthStr = p.tgl.split(' ')[0].split('-')[1];
+      const mIdx = parseInt(monthStr, 10) - 1;
+      if (mIdx >= 0 && mIdx < 12) {
+        monthlySummaries[mIdx].paid += p.jml;
+      }
+    });
+
+    let cumulativePaid = 0;
+    return monthlySummaries.map(m => {
+        cumulativePaid += m.paid;
+        return {
+            month: m.monthName,
+            sisaPiutang: Math.max(0, totalPaguYear - cumulativePaid)
+        };
+    });
+  }, [filteredSPPT, pembayaran, selectedTahun]);
 
   return (
     <div className="space-y-6 fade-in text-slate-700">
@@ -361,6 +400,38 @@ export default function DashboardView({
 
       {/* Monthly Payment Chart */}
       <MonthlyPaymentChart pembayaran={pembayaran} selectedTahun={selectedTahun} />
+
+      {/* Piutang Trend Chart */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
+        <div>
+          <h4 className="text-sm font-bold text-slate-950 flex items-center gap-2">
+            <TrendingDown className="w-5 h-5 text-red-600" />
+            Tren Sisa Piutang Pajak Bulanan ({selectedTahun})
+          </h4>
+          <p className="text-xxs text-slate-400 mt-0.5">
+            Visualisasi penurunan sisa piutang pajak seiring berjalannya waktu
+          </p>
+        </div>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={piutangTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <YAxis 
+                tick={{ fontSize: 10, fill: '#64748b' }} 
+                axisLine={false} 
+                tickLine={false}
+                tickFormatter={(val) => val >= 1000000 ? `${(val / 1000000).toFixed(0)}M` : `${(val / 1000).toFixed(0)}k`} 
+              />
+              <Tooltip 
+                formatter={(value: number) => formatRp(value)}
+                contentStyle={{ borderRadius: '12px', borderColor: '#e2e8f0', fontSize: '12px' }}
+              />
+              <Bar dataKey="sisaPiutang" fill="#ef4444" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       {/* Grid Quick Geo Report */}
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">

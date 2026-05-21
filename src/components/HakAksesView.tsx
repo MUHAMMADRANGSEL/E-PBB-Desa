@@ -8,6 +8,15 @@ interface HakAksesViewProps {
 }
 
 const MENU_LIST = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'panduan', label: 'Panduan' },
+  { id: 'dusun', label: 'Data Dusun' },
+  { id: 'rt', label: 'Data RT' },
+  { id: 'periode', label: 'Periode Pajak' },
+  { id: 'subjek', label: 'Subjek Pajak (WP)' },
+  { id: 'objek', label: 'Objek Pajak (OP)' },
+  { id: 'sppt', label: 'Data SPPT' },
+  { id: 'pembayaran', label: 'Pembayaran & Kas' },
   { id: 'laporan', label: 'Rekap Laporan' },
   { id: 'local_setup', label: 'Setup Database Lokal' },
   { id: 'cloud_sheets', label: 'Integrasi Cloud Sheets' },
