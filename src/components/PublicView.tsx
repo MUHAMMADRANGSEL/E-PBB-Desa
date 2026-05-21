@@ -143,7 +143,7 @@ export default function PublicView({
                 <span className="bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase px-2 py-0.5 rounded-full border border-emerald-200 tracking-wider">LIVE</span>
               </div>
               <span className="text-[10px] text-slate-500 font-bold block mt-0.5 tracking-wide uppercase">
-                Portal Pelayanan Mandiri Desa {settings.nama_desa || 'Makmur'}
+                Portal Pelayanan Mandiri Desa {settings.nama_desa || ''}
               </span>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function PublicView({
               Periksa Tagihan Pajak Bumi & Bangunan
             </h2>
             <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
-              Cek real-time status kelunasan PBB SPPT Desa {settings.nama_desa || 'Makmur'} melalui portal resmi terintegrasi. Cukup masukkan Nomor Objek Pajak (NOP) Anda yang terdaftar.
+              Cek real-time status kelunasan PBB SPPT Desa {settings.nama_desa || ''} melalui portal resmi terintegrasi. Cukup masukkan Nomor Objek Pajak (NOP) Anda yang terdaftar.
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export default function PublicView({
                       <div>
                         <p className="text-xs font-extrabold text-slate-700">NOP Tidak Valid / Tidak Ketemu</p>
                         <p className="text-xxs text-slate-500 leading-relaxed font-semibold max-w-sm mx-auto mt-1">
-                          Nomor Objek Pajak yang Anda masukkan tidak terdaftar di database Desa {settings.nama_desa || 'Makmur'} atau belum memiliki riwayat tahun pajak diterbitkan.
+                          Nomor Objek Pajak yang Anda masukkan tidak terdaftar di database Desa {settings.nama_desa || ''} atau belum memiliki riwayat tahun pajak diterbitkan.
                         </p>
                       </div>
                     </div>
@@ -365,7 +365,7 @@ export default function PublicView({
                   <div>
                     <h4 className="text-xs font-black text-slate-900 group-hover:text-indigo-650 uppercase tracking-widest">KANTOR KEPALA DESA</h4>
                     <p className="text-[11px] text-slate-500 font-bold leading-relaxed uppercase mt-0.5">
-                      Pemerintah Desa {settings.nama_desa || 'Makmur'}
+                      Pemerintah Desa {settings.nama_desa || ''}
                     </p>
                   </div>
                 </div>
@@ -479,12 +479,12 @@ export default function PublicView({
         <footer className="w-full bg-white border-t border-slate-200 px-4 sm:px-6 py-8 relative z-10 text-center space-y-2 shadow-inner">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between text-slate-500 font-semibold text-xxs sm:text-xs">
             <p className="tracking-wide text-center md:text-left leading-normal">
-              &copy; {new Date().getFullYear()} <strong className="text-slate-900 font-bold">{settings.nama_aplikasi?.toUpperCase() || 'E-PBB'}</strong>. PEMERINTAH DESA {settings.nama_desa?.toUpperCase() || 'MAKMUR'}.
+              &copy; {new Date().getFullYear()} <strong className="text-slate-900 font-bold">{settings.nama_aplikasi?.toUpperCase() || 'E-PBB'}</strong>. PEMERINTAH DESA {settings.nama_desa?.toUpperCase() || ''}.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2 mt-2 md:mt-0 uppercase text-[10px] text-slate-600 bg-slate-50 px-3.5 py-1.5 border border-slate-200 rounded-xl font-bold tracking-wide">
-              <span>Kec. {settings.nama_kecamatan || 'Nirwana'}</span>
+              <span>Kec. {settings.nama_kecamatan || ''}</span>
               <span className="w-1.5 h-1.5 bg-slate-300 rounded-full" />
-              <span>Kab. {settings.nama_kabupaten || 'Swarga'}</span>
+              <span>Kab. {settings.nama_kabupaten || ''}</span>
             </div>
           </div>
           <p className="text-[10px] text-slate-400 font-semibold tracking-wide max-w-4xl mx-auto text-center pt-2 leading-relaxed border-t border-slate-100">

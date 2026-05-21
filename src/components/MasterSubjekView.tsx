@@ -358,7 +358,7 @@ export default function MasterSubjekView({
                   value={alamat}
                   rows={2}
                   onChange={(e) => setAlamat(e.target.value)}
-                  placeholder="Contoh: Jl. Lapangan Tengah No. 45 RT 02 RW 01, Desa Makmur Jaya"
+                  placeholder="Contoh: Jl. Utama No. 1 RT 02 RW 01"
                   className="w-full text-xs font-semibold p-3.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 resize-none transition"
                 />
               </div>

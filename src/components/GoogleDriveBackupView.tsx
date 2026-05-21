@@ -184,7 +184,7 @@ export default function GoogleDriveBackupView({
       
       const cleanSuffix = customSuffix.trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
       const suffixPart = cleanSuffix ? `_${cleanSuffix}` : '';
-      const namaDesaClean = (settings.nama_desa || 'Makmur').replace(/\s+/g, '_');
+      const namaDesaClean = (settings.nama_desa || 'Desa_Tidak_Bernama').replace(/\s+/g, '_');
       const filename = `Backup_EPBB_${namaDesaClean}${suffixPart}_${timestamp}.json`;
 
       const result = await backupDatabaseToDrive(fullDatabase, filename);
@@ -234,7 +234,7 @@ export default function GoogleDriveBackupView({
       let reportName = "";
 
       const timestamp = new Date().toISOString().slice(0,10);
-      const namaDesaClean = (settings.nama_desa || 'Makmur').replace(/\s+/g, '_');
+      const namaDesaClean = (settings.nama_desa || 'Desa_Tidak_Bernama').replace(/\s+/g, '_');
 
       if (selectedReport === 'wp') {
         reportName = `Laporan_WajibPajak_${namaDesaClean}_${timestamp}.csv`;

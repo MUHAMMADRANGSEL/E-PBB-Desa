@@ -25,6 +25,7 @@ export default function PengaturanView({
   const [logoApp, setLogoApp] = useState(settings.logo_app);
   const [logoDesa, setLogoDesa] = useState(settings.logo_desa);
   const [gasUrl, setGasUrl] = useState(settings.gas_url);
+  const [footerText, setFooterText] = useState(settings.footer_text);
 
   React.useEffect(() => {
     setAppName(settings.nama_aplikasi || '');
@@ -34,6 +35,7 @@ export default function PengaturanView({
     setLogoApp(settings.logo_app || '');
     setLogoDesa(settings.logo_desa || '');
     setGasUrl(settings.gas_url || '');
+    setFooterText(settings.footer_text || '');
   }, [settings]);
 
   const [message, setMessage] = useState('');
@@ -55,7 +57,8 @@ export default function PengaturanView({
         kabName !== (settings.nama_kabupaten || '') ||
         logoApp !== (settings.logo_app || '') ||
         logoDesa !== (settings.logo_desa || '') ||
-        gasUrl !== (settings.gas_url || '')
+        gasUrl !== (settings.gas_url || '') ||
+        footerText !== (settings.footer_text || '')
       ) {
         onSave({
           ...settings,
@@ -65,7 +68,8 @@ export default function PengaturanView({
           nama_kabupaten: kabName.trim(),
           logo_app: logoApp.trim(),
           logo_desa: logoDesa.trim(),
-          gas_url: gasUrl.trim()
+          gas_url: gasUrl.trim(),
+          footer_text: footerText.trim()
         });
         setMessage(gasUrl.trim() ? 'Tersimpan otomatis ke Cloud!' : 'Tersimpan otomatis secara lokal!');
         setTimeout(() => setMessage(''), 3000);
@@ -73,7 +77,7 @@ export default function PengaturanView({
     }, 1000);
 
     return () => clearTimeout(timeoutId);
-  }, [appName, desaName, kecName, kabName, logoApp, logoDesa, gasUrl, settings, onSave]);
+  }, [appName, desaName, kecName, kabName, logoApp, logoDesa, gasUrl, footerText, settings, onSave]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +97,8 @@ export default function PengaturanView({
       nama_kabupaten: kabName.trim(),
       logo_app: logoApp.trim(),
       logo_desa: logoDesa.trim(),
-      gas_url: gasUrl.trim()
+      gas_url: gasUrl.trim(),
+      footer_text: footerText.trim()
     });
 
     setMessage(gasUrl.trim() ? 'Pengaturan aplikasi berhasil disimpan ke Cloud!' : 'Pengaturan aplikasi berhasil disimpan secara lokal!');
@@ -134,7 +139,7 @@ export default function PengaturanView({
                 type="text"
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
-                placeholder="e.g. E-PBB Desa Makmur Jaya"
+                placeholder="Contoh: E-PBB Desa"
                 className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition cursor-text"
               />
             </div>
@@ -145,7 +150,7 @@ export default function PengaturanView({
                 type="text"
                 value={desaName}
                 onChange={(e) => setDesaName(e.target.value)}
-                placeholder="e.g. Makmur Jaya"
+                placeholder="Contoh: Nama Desa"
                 className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
             </div>
@@ -200,6 +205,19 @@ export default function PengaturanView({
           </div>
 
           <div className="space-y-1 p-4 bg-slate-50 border rounded-2xl mt-2">
+        <label className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+          Teks Footer Aplikasi
+        </label>
+        <input
+          type="text"
+          value={footerText}
+          onChange={(e) => setFooterText(e.target.value)}
+          placeholder="Contoh: © 2026 E-PBB DESA MAKMUR JAYA"
+          className="w-full text-xs font-semibold p-3.5 rounded-xl border border-slate-200 bg-white"
+        />
+      </div>
+
+      <div className="space-y-1 p-4 bg-slate-50 border rounded-2xl mt-2">
             <label className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
               Google Apps Script Sync URL (GAS_URL) <HelpCircle className="w-3.5 h-3.5 text-slate-400 cursor-help" title="Web App URL hasil deploy script Google Sheets Anda" />
             </label>

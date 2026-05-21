@@ -23,6 +23,7 @@ export interface RT {
 export interface Periode {
   tahun: string;
   status: 'Aktif' | 'Nonaktif';
+  tanggal_jatuh_tempo?: string; // New field
   // Dynamic fields computed at runtime
   total_pagu?: number;
   total_bayar?: number;
@@ -108,6 +109,7 @@ export interface Pengaturan {
   logo_desa: string;
   gas_url: string;
   spreadsheet_id?: string;
+  footer_text?: string;
 }
 
 export interface LocalDatabase {

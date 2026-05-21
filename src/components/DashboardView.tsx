@@ -62,7 +62,35 @@ export default function DashboardView({
   const dueSPPTs = filteredSPPT
     .filter(s => s.status === 'Belum Lunas')
     .sort((a, b) => b.pagu - a.pagu)
-    .slice(0, 5);
+    .slice(0, 5)
+    .map(s => {
+      const op = objek.find(o => o.nop === s.nop);
+      const wp = op ? subjek.find(sub => sub.nik === op.nik) : null;
+      return { ...s, wa: wp?.wa || null };
+    });
+
+  // WhatsApp Message Helper
+  const sendWhatsApp = (sppt: typeof dueSPPTs[0], bulk: boolean = false) => {
+    const phone = sppt.wa;
+    if (!phone) {
+        alert(`No phone number for ${sppt.nama_pemilik_sppt || 'Wajib Pajak'}`);
+        return;
+    }
+    const message = `Halo ${sppt.nama_pemilik_sppt || 'Bapak/Ibu'}, kami informasikan bahwa SPPT PBB Anda untuk NOP ${sppt.nop} masih berstatus Belum Lunas sebesar ${formatRp(sppt.pagu)}. Mohon segera melakukan pembayaran sebelum jatuh tempo. Terima kasih.`;
+    const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+    
+    if (bulk) return url;
+    window.open(url, '_blank');
+  };
+
+  const handleBulkWhatsApp = () => {
+    dueSPPTs.forEach(s => {
+        if(s.wa) {
+            const url = sendWhatsApp(s, true);
+            if(url) window.open(url, '_blank');
+        }
+    });
+  };
 
   // Key figures
   const totalSPPT = filteredSPPT.length;
@@ -162,15 +190,37 @@ export default function DashboardView({
       {/* Due Tax Cards if any */}
       {dueSPPTs.length > 0 && (
         <div className="bg-amber-50 rounded-2xl p-6 border border-amber-100 shadow-sm space-y-4">
-          <h4 className="text-sm font-bold text-amber-900 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
-            NOP Jatuh Tempo / Belum Lunas ({selectedTahun})
+          <h4 className="text-sm font-bold text-amber-900 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+                NOP Jatuh Tempo / Belum Lunas ({selectedTahun})
+            </div>
+            {dueSPPTs.length > 0 && (
+                <button 
+                  onClick={handleBulkWhatsApp}
+                  className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded-lg hover:bg-amber-700 font-bold transition flex items-center gap-1.5"
+                >
+                    <Users className="w-3 h-3" />
+                    WA Massal
+                </button>
+            )}
           </h4>
           <div className="space-y-2">
             {dueSPPTs.map(s => (
-              <div key={s.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-amber-100 shadow-xs">
-                <span className="text-xs font-bold text-slate-700">{s.nama_pemilik_sppt || 'Wajib Pajak'}</span>
-                <span className="text-xs font-black text-amber-700">{formatRp(s.pagu)}</span>
+              <div key={s.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-amber-100 shadow-xs animate-blink-highlight">
+                <div>
+                    <span className="text-xs font-bold text-slate-700 block">{s.nama_pemilik_sppt || 'Wajib Pajak'}</span>
+                    <span className="text-xxs text-slate-500 font-medium">NOP: {s.nop}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-amber-700">{formatRp(s.pagu)}</span>
+                    <button 
+                      onClick={() => sendWhatsApp(s)}
+                      className="text-xs bg-emerald-600 text-white p-1.5 rounded-lg hover:bg-emerald-700 font-bold transition"
+                    >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.281 0-5.953 2.672-5.953 5.953 0 1.055.281 2.062.797 2.893L6 17.578l2.766-.75c.891.492 1.922.75 2.953.75 3.281 0 5.953-2.672 5.953-5.953 0-3.281-2.672-5.953-5.953-5.953zm0 10.969c-.938 0-1.875-.234-2.672-.703l-.188-.112-2.11.562.562-2.062-.112-.188c-.516-.844-.797-1.828-.797-2.859 0-2.719 2.203-4.922 4.922-4.922 2.719 0 4.922 2.203 4.922 4.922 0 2.719-2.203 4.922-4.922 4.922z"/></svg>
+                    </button>
+                </div>
               </div>
             ))}
           </div>

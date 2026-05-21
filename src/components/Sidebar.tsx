@@ -108,7 +108,7 @@ export default function Sidebar({
               <div className="flex flex-col truncate">
                 <span className="font-bold text-sm tracking-wide text-white">E-PBB Desa</span>
                 <span className="text-xxs text-amber-500 font-semibold truncate leading-none mt-0.5 uppercase">
-                  {settings.nama_desa || 'Makmur'}
+                  {settings.nama_desa || ''}
                 </span>
               </div>
             )}

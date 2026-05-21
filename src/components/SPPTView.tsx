@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SPPT, ObjekPajak, RT, Subjek, Periode } from '../types';
-import { Plus, Search, FileText, X, Check, ToggleLeft, Sparkles, Filter, CheckCircle2, Clock, MapPin } from 'lucide-react';
+import { Plus, Search, FileText, X, Check, ToggleLeft, Sparkles, Filter, CheckCircle2, Clock, MapPin, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface SPPTViewProps {
   sppt: SPPT[];
@@ -48,6 +49,8 @@ export default function SPPTView({
 
   const [modalOpen, setModalOpen] = useState(false);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedSpptForQr, setSelectedSpptForQr] = useState<SPPT | null>(null);
   const [error, setError] = useState('');
 
   // Form states for manual single SPPT creation
@@ -305,6 +308,12 @@ export default function SPPTView({
                       <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold">
                         {item.tahun}
                       </span>
+                      {(() => {
+                        const p = periode.find(p => p.tahun === item.tahun);
+                        return p?.tanggal_jatuh_tempo ? (
+                          <p className="text-[9px] text-amber-700 font-bold mt-1">Tempo: {p.tanggal_jatuh_tempo}</p>
+                        ) : null;
+                      })()}
                     </td>
                     <td className="p-4 font-black text-slate-800">{formatRp(item.pagu)}</td>
                     <td className="p-4 text-center">
@@ -320,17 +329,28 @@ export default function SPPTView({
                       </button>
                     </td>
                     <td className="p-4 text-right">
-                      <button
-                        onClick={() => {
-                          if (confirm(`Yakin ingin membatalkan/menghapus SPPT ${item.id}? Tindakan ini akan menghapus tagihan tahun pajak terkait.`)) {
-                            onDelete(item.id);
-                          }
-                        }}
-                        disabled={isLunas}
-                        className="text-[10.5px] font-bold text-red-650 hover:bg-slate-100 disabled:text-slate-300 disabled:hover:bg-transparent p-1.5 rounded-lg border border-transparent transition cursor-pointer"
-                      >
-                        Hapus
-                      </button>
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          onClick={() => {
+                            setSelectedSpptForQr(item);
+                            setQrModalOpen(true);
+                          }}
+                          className="text-[10.5px] font-bold text-indigo-650 hover:bg-slate-100 p-1.5 rounded-lg border border-transparent transition cursor-pointer"
+                        >
+                          <QrCode className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Yakin ingin membatalkan/menghapus SPPT ${item.id}? Tindakan ini akan menghapus tagihan tahun pajak terkait.`)) {
+                              onDelete(item.id);
+                            }
+                          }}
+                          disabled={isLunas}
+                          className="text-[10.5px] font-bold text-red-650 hover:bg-slate-100 disabled:text-slate-300 disabled:hover:bg-transparent p-1.5 rounded-lg border border-transparent transition cursor-pointer"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -542,6 +562,37 @@ export default function SPPTView({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Pop QR Code Modal */}
+      {qrModalOpen && selectedSpptForQr && (
+        <div className="fixed inset-0 bg-slate-900/60 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in animate-duration-300">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-100 flex flex-col scale-up">
+            <div className="bg-slate-950 p-4 border-b flex justify-between items-center text-white">
+              <h4 className="text-sm font-bold flex items-center gap-1.5">
+                <QrCode className="w-4 h-4 text-blue-400" />
+                QR Code SPPT
+              </h4>
+              <button 
+                onClick={() => { setQrModalOpen(false); setSelectedSpptForQr(null); }} 
+                className="text-slate-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 flex flex-col items-center justify-center space-y-4">
+              <QRCodeSVG 
+                 value={JSON.stringify({ nop: selectedSpptForQr.nop, id: selectedSpptForQr.id })} 
+                 size={256}
+                 level="H"
+              />
+              <div className="text-center">
+                <p className="text-sm font-bold text-slate-900">{selectedSpptForQr.id}</p>
+                <p className="text-xs text-slate-500">NOP: {selectedSpptForQr.nop}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

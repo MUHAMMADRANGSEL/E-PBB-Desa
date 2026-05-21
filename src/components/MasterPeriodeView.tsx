@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Periode } from '../types';
-import { Plus, Calendar, Check, X, ShieldAlert, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Calendar, Check, X, ShieldAlert, Edit2 } from 'lucide-react';
 
 interface MasterPeriodeViewProps {
   periode: Periode[];
   onAdd: (newPeriode: Periode) => void;
+  onEdit: (updatedPeriode: Periode) => void;
   onToggleStatus: (tahun: string) => void;
   onDelete: (tahun: string) => void;
 }
@@ -12,32 +13,51 @@ interface MasterPeriodeViewProps {
 export default function MasterPeriodeView({
   periode,
   onAdd,
+  onEdit,
   onToggleStatus,
   onDelete
 }: MasterPeriodeViewProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [tahun, setTahun] = useState('');
+  const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState('');
+  const [editingPeriode, setEditingPeriode] = useState<Periode | null>(null);
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!tahun.trim() || isNaN(Number(tahun)) || tahun.trim().length !== 4) {
-      setError('Masukkan format tahun 4 digit angka (misal: 2026).');
-      return;
+    if (!editingPeriode) {
+      if (!tahun.trim() || isNaN(Number(tahun)) || tahun.trim().length !== 4) {
+        setError('Masukkan format tahun 4 digit angka (misal: 2026).');
+        return;
+      }
+      if (periode.some(p => p.tahun === tahun.trim())) {
+        setError('Tahun pajak sudah terdaftar di sistem.');
+        return;
+      }
+    }
+    
+    if (!tanggalJatuhTempo.trim()) {
+       setError('Harap tentukan tanggal jatuh tempo.');
+       return;
     }
 
-    if (periode.some(p => p.tahun === tahun.trim())) {
-      setError('Tahun pajak sudah terdaftar di sistem.');
-      return;
+    if (editingPeriode) {
+        onEdit({
+            ...editingPeriode,
+            tanggal_jatuh_tempo: tanggalJatuhTempo.trim()
+        });
+    } else {
+        onAdd({
+          tahun: tahun.trim(),
+          status: 'Nonaktif',
+          tanggal_jatuh_tempo: tanggalJatuhTempo.trim()
+        });
     }
-
-    onAdd({
-      tahun: tahun.trim(),
-      status: 'Nonaktif' // Default created as inactive
-    });
     setTahun('');
+    setTanggalJatuhTempo('');
+    setEditingPeriode(null);
     setModalOpen(false);
   };
 
@@ -91,6 +111,7 @@ export default function MasterPeriodeView({
                 <div>
                   <span className="text-2xl font-black text-slate-900">{p.tahun}</span>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase mt-1 tracking-wider">TAHUN PAJAK</p>
+                  <p className="text-[10px] text-emerald-700 font-bold mt-2">Jatuh Tempo: {p.tanggal_jatuh_tempo || '-'}</p>
                 </div>
                 
                 <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border
@@ -113,18 +134,32 @@ export default function MasterPeriodeView({
                   {isActive ? 'Aktif Sekarang' : 'Set Aktif'}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (confirm(`Hapus periode ${p.tahun}? Hal ini tidak menghapus data SPPT yang sudah terbit, tetapi akan menyulitkan penyaringan.`)) {
-                      onDelete(p.tahun);
-                    }
-                  }}
-                  disabled={isActive}
-                  className="text-[10.5px] font-bold text-red-650 hover:bg-red-50 disabled:text-slate-300 disabled:bg-transparent px-2.5 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition"
-                >
-                  Hapus
-                </button>
+                <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingPeriode(p);
+                        setTahun(p.tahun);
+                        setTanggalJatuhTempo(p.tanggal_jatuh_tempo || '');
+                        setModalOpen(true);
+                      }}
+                       className="text-[10.5px] font-bold text-slate-600 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg border border-transparent transition"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(`Hapus periode ${p.tahun}? Hal ini tidak menghapus data SPPT yang sudah terbit, tetapi akan menyulitkan penyaringan.`)) {
+                          onDelete(p.tahun);
+                        }
+                      }}
+                      disabled={isActive}
+                      className="text-[10.5px] font-bold text-red-650 hover:bg-red-50 disabled:text-slate-300 disabled:bg-transparent px-2.5 py-1.5 rounded-lg border border-transparent hover:border-red-100 transition"
+                    >
+                      Hapus
+                    </button>
+                </div>
               </div>
             </div>
           );
@@ -138,14 +173,14 @@ export default function MasterPeriodeView({
             <div className="bg-slate-950 p-4 border-b flex justify-between items-center text-white">
               <h4 className="text-sm font-bold flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-blue-400" />
-                Tambah Tahun Pajak
+                {editingPeriode ? 'Edit Tahun Pajak' : 'Tambah Tahun Pajak'}
               </h4>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-white transition">
+              <button onClick={() => { setModalOpen(false); setEditingPeriode(null); }} className="text-slate-400 hover:text-white transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <form onSubmit={handleCreate} className="p-5 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {error && (
                 <div className="text-xxs font-bold text-red-650 bg-red-50/70 p-3 rounded-xl border border-red-150">
                   {error}
@@ -158,8 +193,18 @@ export default function MasterPeriodeView({
                   type="text"
                   maxLength={4}
                   value={tahun}
+                  disabled={!!editingPeriode}
                   onChange={(e) => setTahun(e.target.value)}
                   placeholder="Contoh: 2026"
+                  className={`w-full text-center text-base font-black p-3.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition ${editingPeriode ? 'bg-slate-100 cursor-not-allowed' : ''}`}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider block">Tanggal Jatuh Tempo</label>
+                <input
+                  type="date"
+                  value={tanggalJatuhTempo}
+                  onChange={(e) => setTanggalJatuhTempo(e.target.value)}
                   className="w-full text-center text-base font-black p-3.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition"
                 />
               </div>
@@ -167,7 +212,7 @@ export default function MasterPeriodeView({
               <div className="flex gap-2.5 justify-end pt-3 border-t">
                 <button
                   type="button"
-                  onClick={() => setModalOpen(false)}
+                  onClick={() => { setModalOpen(false); setEditingPeriode(null); }}
                   className="px-4 py-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition"
                 >
                   Batal

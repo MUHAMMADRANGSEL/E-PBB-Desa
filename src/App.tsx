@@ -312,6 +312,10 @@ export default function App() {
     dbManager.writeRow('periode', newPeriode, 'tahun');
     setPeriode(dbManager.getTable('periode'));
   };
+  const handleEditPeriode = (updatedPeriode: Periode) => {
+    dbManager.writeRow('periode', updatedPeriode, 'tahun');
+    setPeriode(dbManager.getTable('periode'));
+  };
   const handleToggleStatusPeriode = (tahunToActivate: string) => {
     // Standard rule: only ONE active year at a time!
     const currentList = dbManager.getTable('periode');
@@ -571,6 +575,7 @@ export default function App() {
           <MasterPeriodeView 
             periode={periode}
             onAdd={handleAddPeriode}
+            onEdit={handleEditPeriode}
             onToggleStatus={handleToggleStatusPeriode}
             onDelete={handleDeletePeriode}
           />
@@ -907,7 +912,11 @@ export default function App() {
 
         {/* Admin section footer */}
         <footer className="p-4 bg-white border-t border-slate-200/55 text-center text-[10.5px] text-slate-400 font-bold select-none flex-shrink-0">
-          &copy; {new Date().getFullYear()} <strong className="text-slate-600">E-PBB DESA {settings.nama_desa.toUpperCase()}</strong>. SISTEM MANAJEMEN PAJAK MODEL LOKAL.
+          {settings.footer_text || (
+            <>
+              &copy; {new Date().getFullYear()} <strong className="text-slate-600">E-PBB DESA {settings.nama_desa.toUpperCase()}</strong>. SISTEM MANAJEMEN PAJAK MODEL LOKAL.
+            </>
+          )}
         </footer>
       </div>
 
