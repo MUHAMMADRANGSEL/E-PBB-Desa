@@ -30,6 +30,7 @@ import PenggunaView from './components/PenggunaView';
 import PublicView from './components/PublicView';
 import SinkronisasiView from './components/SinkronisasiView';
 import PanduanView from './components/PanduanView';
+import VillageSelectorView from './components/VillageSelectorView';
 
 // Icons
 import { 
@@ -53,8 +54,13 @@ import {
 
 export default function App() {
   // Screens navigation routing state: 'public' | 'login' | 'admin'
-  const [activeScreen, setActiveScreen] = useState<'public' | 'login' | 'admin'>(() => {
+  const [activeScreen, setActiveScreen] = useState<'village_select' | 'public' | 'login' | 'admin'>(() => {
     const saved = localStorage.getItem('epbb_user_session');
+    // If settings has list of desas, force village selection
+    const db = dbManager.getDatabase();
+    if (db.pengaturan.daftar_desa && db.pengaturan.daftar_desa.length > 0) {
+        return 'village_select';
+    }
     return saved ? 'admin' : 'public';
   });
 
@@ -720,6 +726,24 @@ export default function App() {
   // ----------------------------------------------------
 
   // 1. PUBLIC LANDING VIEW SCREEN
+  if (activeScreen === 'village_select' && settings.daftar_desa && settings.daftar_desa.length > 0) {
+    return (
+      <VillageSelectorView 
+        desaList={settings.daftar_desa}
+        onSelect={(desa) => {
+            handleSaveSettings({
+                ...settings,
+                nama_desa: desa.nama,
+                gas_url: desa.gas_url,
+                spreadsheet_id: desa.spreadsheet_id
+            });
+            setActiveScreen('public');
+        }}
+      />
+    );
+  }
+
+  // 2. PUBLIC LANDING VIEW SCREEN
   if (activeScreen === 'public') {
     return (
       <PublicView 

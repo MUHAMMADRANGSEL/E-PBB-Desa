@@ -100,6 +100,13 @@ export interface Pengguna {
   permissions?: MenuPermission[];
 }
 
+export interface Desa {
+  id: string;
+  nama: string;
+  gas_url: string;
+  spreadsheet_id?: string;
+}
+
 export interface Pengaturan {
   nama_aplikasi: string;
   nama_desa: string;
@@ -110,6 +117,7 @@ export interface Pengaturan {
   gas_url: string;
   spreadsheet_id?: string;
   footer_text?: string;
+  daftar_desa?: Desa[]; // List of available villages
 }
 
 export interface LocalDatabase {

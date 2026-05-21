@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Pengaturan } from '../types';
+import { Pengaturan, Desa } from '../types';
 import { 
   Settings, 
   Save,
   HelpCircle,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  Trash2
 } from 'lucide-react';
 
 interface PengaturanViewProps {
@@ -18,14 +20,15 @@ export default function PengaturanView({
   onSave
 }: PengaturanViewProps) {
   // Form elements
-  const [appName, setAppName] = useState(settings.nama_aplikasi);
-  const [desaName, setDesaName] = useState(settings.nama_desa);
-  const [kecName, setKecName] = useState(settings.nama_kecamatan);
-  const [kabName, setKabName] = useState(settings.nama_kabupaten);
-  const [logoApp, setLogoApp] = useState(settings.logo_app);
-  const [logoDesa, setLogoDesa] = useState(settings.logo_desa);
-  const [gasUrl, setGasUrl] = useState(settings.gas_url);
-  const [footerText, setFooterText] = useState(settings.footer_text);
+  const [appName, setAppName] = useState(settings.nama_aplikasi || '');
+  const [desaName, setDesaName] = useState(settings.nama_desa || '');
+  const [kecName, setKecName] = useState(settings.nama_kecamatan || '');
+  const [kabName, setKabName] = useState(settings.nama_kabupaten || '');
+  const [logoApp, setLogoApp] = useState(settings.logo_app || '');
+  const [logoDesa, setLogoDesa] = useState(settings.logo_desa || '');
+  const [gasUrl, setGasUrl] = useState(settings.gas_url || '');
+  const [footerText, setFooterText] = useState(settings.footer_text || '');
+  const [daftarDesa, setDaftarDesa] = useState<Desa[]>(settings.daftar_desa || []);
 
   React.useEffect(() => {
     setAppName(settings.nama_aplikasi || '');
@@ -36,10 +39,25 @@ export default function PengaturanView({
     setLogoDesa(settings.logo_desa || '');
     setGasUrl(settings.gas_url || '');
     setFooterText(settings.footer_text || '');
+    setDaftarDesa(settings.daftar_desa || []);
   }, [settings]);
 
   const [message, setMessage] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  
+  const updateDesa = (index: number, field: keyof Desa, value: string) => {
+    const newDaftar = [...daftarDesa];
+    newDaftar[index] = { ...newDaftar[index], [field]: value };
+    setDaftarDesa(newDaftar);
+  };
+  
+  const addDesa = () => {
+    setDaftarDesa([...daftarDesa, { id: Date.now().toString(), nama: '', gas_url: '' }]);
+  };
+
+  const removeDesa = (index: number) => {
+    setDaftarDesa(daftarDesa.filter((_, i) => i !== index));
+  };
 
   const isFirstRender = React.useRef(true);
 
@@ -58,7 +76,8 @@ export default function PengaturanView({
         logoApp !== (settings.logo_app || '') ||
         logoDesa !== (settings.logo_desa || '') ||
         gasUrl !== (settings.gas_url || '') ||
-        footerText !== (settings.footer_text || '')
+        footerText !== (settings.footer_text || '') ||
+        JSON.stringify(daftarDesa) !== JSON.stringify(settings.daftar_desa || [])
       ) {
         onSave({
           ...settings,
@@ -69,15 +88,16 @@ export default function PengaturanView({
           logo_app: logoApp.trim(),
           logo_desa: logoDesa.trim(),
           gas_url: gasUrl.trim(),
-          footer_text: footerText.trim()
+          footer_text: footerText.trim(),
+          daftar_desa: daftarDesa
         });
-        setMessage(gasUrl.trim() ? 'Tersimpan otomatis ke Cloud!' : 'Tersimpan otomatis secara lokal!');
+        setMessage('Tersimpan otomatis!');
         setTimeout(() => setMessage(''), 3000);
       }
     }, 1000);
 
     return () => clearTimeout(timeoutId);
-  }, [appName, desaName, kecName, kabName, logoApp, logoDesa, gasUrl, footerText, settings, onSave]);
+  }, [appName, desaName, kecName, kabName, logoApp, logoDesa, gasUrl, footerText, daftarDesa, settings, onSave]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,10 +118,11 @@ export default function PengaturanView({
       logo_app: logoApp.trim(),
       logo_desa: logoDesa.trim(),
       gas_url: gasUrl.trim(),
-      footer_text: footerText.trim()
+      footer_text: footerText.trim(),
+      daftar_desa: daftarDesa
     });
 
-    setMessage(gasUrl.trim() ? 'Pengaturan aplikasi berhasil disimpan ke Cloud!' : 'Pengaturan aplikasi berhasil disimpan secara lokal!');
+    setMessage('Pengaturan aplikasi berhasil disimpan!');
     setTimeout(() => setMessage(''), 4000);
   };
 
@@ -205,17 +226,53 @@ export default function PengaturanView({
           </div>
 
           <div className="space-y-1 p-4 bg-slate-50 border rounded-2xl mt-2">
-        <label className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-          Teks Footer Aplikasi
-        </label>
-        <input
-          type="text"
-          value={footerText}
-          onChange={(e) => setFooterText(e.target.value)}
-          placeholder="Contoh: © 2026 E-PBB DESA MAKMUR JAYA"
-          className="w-full text-xs font-semibold p-3.5 rounded-xl border border-slate-200 bg-white"
-        />
-      </div>
+            <label className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              Teks Footer Aplikasi
+            </label>
+            <input
+              type="text"
+              value={footerText}
+              onChange={(e) => setFooterText(e.target.value)}
+              placeholder="Contoh: © 2026 E-PBB DESA MAKMUR JAYA"
+              className="w-full text-xs font-semibold p-3.5 rounded-xl border border-slate-200 bg-white"
+            />
+          </div>
+
+          <div className="space-y-1 p-4 bg-slate-50 border rounded-2xl mt-4">
+            <h4 className="text-sm font-bold text-slate-800 flex items-center justify-between">
+              Daftar Desa dalam Portal
+              <button onClick={addDesa} className="p-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200">
+                <Plus className="w-4 h-4" />
+              </button>
+            </h4>
+            
+            <div className="space-y-2 pt-2">
+              {daftarDesa.map((desa, index) => (
+                <div key={desa.id} className="grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
+                  <input
+                    type="text"
+                    value={desa.nama}
+                    onChange={(e) => updateDesa(index, 'nama', e.target.value)}
+                    placeholder="Nama Desa"
+                    className="text-xs p-2 rounded-lg border border-slate-200"
+                  />
+                  <input
+                    type="text"
+                    value={desa.gas_url}
+                    onChange={(e) => updateDesa(index, 'gas_url', e.target.value)}
+                    placeholder="GAS URL"
+                    className="text-xs p-2 rounded-lg border border-slate-200"
+                  />
+                  <button onClick={() => removeDesa(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              {daftarDesa.length === 0 && (
+                <p className="text-xs text-slate-400 italic">Belum ada desa ditambahkan.</p>
+              )}
+            </div>
+          </div>
 
       <div className="space-y-1 p-4 bg-slate-50 border rounded-2xl mt-2">
             <label className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
