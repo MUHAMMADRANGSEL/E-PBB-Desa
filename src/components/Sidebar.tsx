@@ -66,7 +66,6 @@ export default function Sidebar({
     { id: 'local_setup', label: 'Setup Database Lokal', icon: Wrench, section: 'Laporan & Pengaturan', adminOnly: true },
     { id: 'cloud_sheets', label: 'Integrasi Cloud Sheets', icon: Cloud, section: 'Laporan & Pengaturan', adminOnly: true },
     { id: 'pengguna', label: 'Pengguna & Akses', icon: Users2, section: 'Laporan & Pengaturan', adminOnly: true },
-    { id: 'hak_akses', label: 'Hak Akses User', icon: ShieldCheck, section: 'Laporan & Pengaturan', adminOnly: true },
     { id: 'pengaturan', label: 'Pengaturan Aplikasi', icon: Settings, section: 'Laporan & Pengaturan', adminOnly: true }
   ];
 
